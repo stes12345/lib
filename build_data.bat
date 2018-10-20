@@ -1,5 +1,5 @@
 @echo off & setlocal ENABLEEXTENSIONS enabledelayedexpansion
-:: use with $(ProjectDir)\build_data.bat $(ProjectDir) $(RootNameSpace) to take build timestamp
+:: use with pre-build event $(ProjectDir)\build_data.bat $(ProjectDir) $(RootNameSpace) to take build timestamp
 set AppData=%1AppData.cs
 call :GetTime h n s t
 call :GetDate y m d
