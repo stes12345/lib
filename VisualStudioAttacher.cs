@@ -13,16 +13,16 @@ using EnvDTE80;
 using DTEProcess = EnvDTE.Process;
 using Process = System.Diagnostics.Process;
 
-namespace theapp.IntegrationTests.Helpers
+namespace theapp.Helpers
 {
     #region Classes
 
     public class VisualStudioAttacher : Microsoft.VisualStudio.Shell.Package
     {
         // based on https://pastebin.com/KKyBpWQW https://codegists.com/code/debugging-attach-to-process-visual-studio/  [Apartment(ApartmentState.STA)]
-        public const string HostServiceExecutable = @"theapp";
+        public const string theappExecutable = @"theapp";
         public const string IisExecutable = "iisexpress.exe";
-        public const string HostServicePath = @"\theapp\bin\Debug\";
+        public const string theappPath = @"\theapp\bin\Debug\";
 
         #region Public Methods
 
@@ -37,8 +37,8 @@ namespace theapp.IntegrationTests.Helpers
         /// </summary>
         /// <param name="path"></param>
         /// <param name="processImageName"></param>
-        /// <param name="hostServiceName"></param>
-        public static void AttachVisualStudioToProcess(string path, string processImageName, string hostServiceName)
+        /// <param name="theappName"></param>
+        public static void AttachVisualStudioToProcess(string path, string processImageName, string theappName)
         {
             _DTE visualStudioInstance;
             Debugger5 dbg5;
@@ -50,9 +50,9 @@ namespace theapp.IntegrationTests.Helpers
 
             var dbgeng = trans.Engines.Item("Managed (v4.6, v4.5, v4.0)");
 
-            if (!string.IsNullOrEmpty(hostServiceName))
+            if (!string.IsNullOrEmpty(theappName))
             {
-                TryStopProcess(processImageName, hostServiceName, false, dbg5, trans);
+                TryStopProcess(processImageName, theappName, false, dbg5, trans);
 
                 var thisLocation = Path.GetDirectoryName(path);
                 if (string.IsNullOrEmpty(thisLocation))
@@ -62,7 +62,7 @@ namespace theapp.IntegrationTests.Helpers
                 const string baseDirectory = @"\src\";
                 var exelPath = thisLocation.Substring(0,
                                    thisLocation.LastIndexOf(baseDirectory, StringComparison.CurrentCultureIgnoreCase) +
-                                   baseDirectory.Length) + HostServicePath + hostServiceName + ".exe";
+                                   baseDirectory.Length) + theappPath + theappName + ".exe";
                 var process = Process.Start(exelPath);
                 foreach (DTEProcess proc in dbg5.LocalProcesses)
                 {
@@ -112,11 +112,11 @@ namespace theapp.IntegrationTests.Helpers
         /// tries to detach IIS and to stop host service
         /// </summary>
         /// <param name="processImageName"></param>
-        /// <param name="hostServiceName"></param>
+        /// <param name="theappName"></param>
         /// <param name="detachAll"></param>
         /// <param name="dbg5"></param>
         /// <param name="trans"></param>
-        public static void TryStopProcess(string processImageName, string hostServiceName, bool detachAll, Debugger5 dbg5 = null, Transport trans = null)
+        public static void TryStopProcess(string processImageName, string theappName, bool detachAll, Debugger5 dbg5 = null, Transport trans = null)
         {
             var dteInitialized = false;
             //if (dbg5 == null)
@@ -144,11 +144,11 @@ namespace theapp.IntegrationTests.Helpers
             //        Console.WriteLine(e);
             //    }
             //}
-            //foreach (var process in Process.GetProcessesByName(hostServiceName, Environment.MachineName))
+            //foreach (var process in Process.GetProcessesByName(theappName, Environment.MachineName))
             //{
             //    process.Kill();
             //}
-            var processes = Process.GetProcesses().ToList().Where(p => p.ProcessName == HostServiceExecutable);
+            var processes = Process.GetProcesses().ToList().Where(p => p.ProcessName == theappExecutable);
             foreach (var process in processes.ToList())
             {
                 try
