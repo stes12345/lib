@@ -771,6 +771,6 @@ if ($result == 0){
 				return(round($dif/86400)); //86400s=1d
 		}
 	}
-	// 
+	// $subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
 }
 ?>
