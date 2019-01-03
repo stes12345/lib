@@ -74,9 +74,18 @@ Public Const HWND_BOTTOM = 1
 Public Const HWND_TOPMOST = -1
 Public Const HWND_NOTOPMOST = -2
    
-Public Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal uFlags As Long) As Long
-
-Public Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+' Windows API calls to handle windows
+#If VBA7 Then
+    Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+    Public Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
+    Public Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+    Public Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal uFlags As Long) As Long
+#Else
+    Public Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+    Public Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
+    Public Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+    Public Declare Function SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal uFlags As Long) As Long
+#End If
 
 Private Sub UserForm_Initialize()
 	Const C_VBA6_USERFORM_CLASSNAME = "ProgressBar1"
@@ -86,4 +95,27 @@ Private Sub UserForm_Initialize()
     ret = SetWindowPos(formHWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
 End Sub
 
+Public Sub subRemoveCloseButton(frm As Object)
+    ' remove user form close "x" to prevent closing it
+    Dim lngStyle As Long
+    Dim lngHWnd As Long
 
+    lngHWnd = FindWindow(vbNullString, frm.Caption)
+    lngStyle = GetWindowLong(lngHWnd, mcGWL_STYLE)
+
+    If lngStyle And mcWS_SYSMENU > 0 Then
+        SetWindowLong lngHWnd, mcGWL_STYLE, (lngStyle And Not mcWS_SYSMENU)
+    End If
+
+End Sub
+
+Public Function GetSheetByCodeName(codeName As String)
+    ' open sheet by code name to not depend on visible name changes
+    Dim sheets1 As Collection, sheetIndex As Integer, sheet As Worksheet
+    For Each sheet In ActiveWorkbook.Worksheets
+        If sheet.codeName = codeName Then
+            Set GetSheetByCodeName = sheet
+            Exit Function
+        End If
+    Next sheet
+End Function
