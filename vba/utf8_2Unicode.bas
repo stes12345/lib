@@ -22,26 +22,13 @@ Private Function utf8_2Unicode(c As Variant) As Variant
     Dim sNew As String, nPos As Long, nChar As Long, nChar2 As Long
     If IsNull(c) Or c = "" Then utf8_2Unicode = c: Exit Function
     sNew = ""
-    nPos = 1
-    Do While nPos < Len(c)
+    For nPos = 1 To Len(c)
         nChar = AscW(Mid(c, nPos, 1))
-        If nChar = &HD0 Or nChar = &HD1 Then
-            nChar2 = AscW(Mid(c, nPos + 1, 1))
-            If nChar = &HD0 Then
-                sNew = sNew & ChrW(nChar2 + &H400 - &H80)
-            ElseIf nChar = &HD1 Then
-                sNew = sNew & ChrW(nChar2 + &H400 - &H40)
-            End If
-            nPos = nPos + 2
-        Else
-            sNew = sNew & ChrW(nChar)
-            nPos = nPos + 1
+        If nChar >= &H410 Or nChar <= &H450 Then
+            nChar = nChar - &H350
         End If
-        
-        If nChar > &HBF And nChar < &H100 Then
-            nChar = nChar + &H350
-        End If
-    Loop
+        sNew = sNew & ChrW(nChar)
+    Next nPos
     utf8_2Unicode = sNew
 End Function
 
